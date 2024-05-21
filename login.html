@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Page</title>
+  <style>
+     body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    
+    .container {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      width: 300px;
+    }
+    
+    h2 {
+      text-align: center;
+    }
+    
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    
+    input[type="submit"] {
+      width: 100%;
+      background-color: #4caf50;
+      color: white;
+      padding: 10px 0;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    
+    input[type="submit"]:hover {
+      background-color: #45a049;
+    }
+
+    .links {
+      margin-top: 10px;
+      text-align: right;
+    }
+
+    .links a {
+      text-decoration: none;
+      color: #4caf50;
+      margin: 0 10px;
+    }
+
+    .links a:hover {
+      text-decoration: underline;
+    }
+    /* Your existing styles here */
+  </style>
+</head>
+<body>
+  <div class="container" id="loginContainer">
+    <h2>LOGIN</h2>
+    <form id="loginForm">
+      <input type="text" name="username" id="username" placeholder="Username">
+      <input type="password" name="password" id="password" placeholder="Password">
+      <input type="submit" value="Login">
+    </form>
+    <div class="links">
+      <span>|</span>
+      <a href="file:///D:/python%20project/register.html">
+        New Register
+      </a>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", function(event) {
+      event.preventDefault(); // Prevent default form submission
+      
+      // Get username and password values
+      var username = document.getElementById("username").value;
+      var password = document.getElementById("password").value;
+      
+      // Check if username and password are valid (you can add your validation logic here)
+      var isValid = true; // Example validation, you can replace it with your own logic
+      
+      if (isValid) {
+        // Redirect to specific site
+        window.location.href = "file:///D:/python%20project/page_3/index.html";
+      }
+    });
+  </script>
+</body>
+</html>
+
