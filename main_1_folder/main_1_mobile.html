@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map with Click Coordinates</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+        }
+
+        .map-container {
+            height: 80vh; /* Half of the viewport height */
+            width: 100%;
+        }
+
+        .controls-container {
+            padding: 20px;
+            background-color: #fff;
+            border-top: 1px solid #ccc;
+        }
+
+        .controls {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 20px;
+            text-align: center;
+        }
+
+        .controls label {
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .controls input[type="number"] {
+            width: 90px;
+            padding: 10px;
+            margin-right: 10px;
+        }
+
+        .controls button {
+            padding: 8px 16px;
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .controls button:hover {
+            background-color: #000000;
+        }
+
+        .refresh-page {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+        }
+
+        .refresh-page:hover {
+            background-color: #10f93f;
+        }
+
+        .logo {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+        }
+
+        @media (min-width: 769px) {
+            .map-container {
+                height: 780px; /* Full viewport height on larger screens */
+            }
+        }
+
+        @media (max-width: 768px) {
+            .map-container {
+                height: 70vh; /* Half of the viewport height on smaller screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="map-container" id="map"></div>
+    <div class="controls-container">
+        <div class="controls">
+            <label for="p-value">ENTER THE REQUIRED NO. OF STOREHOUSE NEEDED: </label>
+            <input type="number" id="p-value" min="1" step="1" value="1">
+            <button onclick="showPoints()">SHOW POINT LOCATION</button>
+            <button onclick="undoLastPoint()">Undo point</button>
+            <button onclick="location.reload()">New Points</button>
+            <div id="points-container" class="points-container"></div>
+        </div>
+    </div>
+    
+    <img src="location (1).png" alt="Logo" class="logo">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+    <script>
+        var points = [];
+        var markers = [];
+
+        // Initialize map
+        var map = L.map('map').setView([35, 80], 2.5);
+
+        // Add tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Define a custom icon for the location finder 1
+        var locationFinderIcon1 = L.icon({
+            iconUrl: 'location.png',
+            iconSize: [32, 32],
+            iconAnchor: [16, 32],
+        });
+
+        // Define a custom icon for the location finder 2
+        var locationFinderIcon2 = L.icon({
+            iconUrl: 'pin.png',
+            iconSize: [32, 32],
+            iconAnchor: [16, 32],
+        });
+
+        // Event listener for clicking on the map
+        map.on('click', function(e) {
+            var clickedLatLng = e.latlng;
+            var x = clickedLatLng.lng;
+            var y = clickedLatLng.lat;
+
+            // Create a marker with the custom icon at the clicked point
+            var marker = L.marker([y, x], { icon: locationFinderIcon1 }).addTo(map);
+            markers.push(marker);
+
+            // Add coordinates to points array
+            points.push([x * 100000000000000000, y * 100000000000000000]);
+        });
+
+        // Function to undo the last point
+        function undoLastPoint() {
+            points.pop();
+
+            var lastMarker = markers.pop();
+            if (lastMarker) {
+                map.removeLayer(lastMarker);
+            }
+        }
+
+        // Event listener for undoing the last point using Ctrl + Z
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'z') {
+                undoLastPoint();
+            }
+        });
+
+        // Function to show points array
+        function showPoints() {
+            var pointsContainer = document.getElementById('points-container');
+            var pValue = document.getElementById('p-value').value;
+            pointsContainer.innerHTML = 'loading...';
+
+            fetch('https://opti-loco.onrender.com/process_points', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ points: points, p: pValue })
+            })
+            .then(response => response.json())
+            .then(data => {
+                pointsContainer.innerHTML = 'The Location points have been marked on the map.';
+
+                // Remove existing markers before adding new ones
+                markers.forEach(marker => map.removeLayer(marker));
+                markers = [];
+
+                data.forEach(coord => {
+                    var x = coord[0];
+                    var y = coord[1];
+
+                    var marker = L.marker([y / 100000000000000000, x / 100000000000000000], { icon: locationFinderIcon2 }).addTo(map);
+                    markers.push(marker);
+                });
+            })
+            .catch(error => {
+                pointsContainer.innerHTML = 'Error: ' + error.message;
+            });
+        }
+    </script>
+</body>
+</html>
